@@ -3,7 +3,7 @@ export default function GoogleAuthButton({ label }: { label: string }) {
     <>
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2.5 rounded-md border border-line bg-card py-2.5 text-sm font-medium text-ink transition-colors hover:bg-paper-soft"
+        className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-line bg-card py-3 text-sm font-semibold text-ink transition-colors hover:bg-paper-soft"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
           <path
