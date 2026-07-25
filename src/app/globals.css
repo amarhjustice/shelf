@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+:root {
+  /* Core palette — warm library / reading-room */
+  --paper: #f6f1e7;
+  --paper-soft: #efe7d8;
+  --paper-deep: #e9decb;
+  --ink: #211d16;
+  --ink-soft: #5c574a;
+  --ink-faint: #928c7a;
+
+  --forest: #16261f;
+  --forest-soft: #1f362c;
+  --forest-tint: #eef1ec;
+
+  --gold: #c08a3e;
+  --gold-soft: #f4dfb4;
+
+  --sepia: #f1e6cd;
+
+  --line: #e2d8c3;
+  --card: #ffffff;
+
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "URW Palladio L",
+    Palatino, "Book Antiqua", serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-soft: var(--paper-soft);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-forest: var(--forest);
+  --color-forest-soft: var(--forest-soft);
+  --color-forest-tint: var(--forest-tint);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-sepia: var(--sepia);
+  --color-line: var(--line);
+  --color-card: var(--card);
+
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-body);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--gold-soft);
+  color: var(--ink);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
