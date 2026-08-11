@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Clock, Flame, Library } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BookOpen, Clock, Flame, Library, LogOut } from "lucide-react";
 import { currentUser } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const tabs = ["Account", "Reading Preferences", "Notifications"] as const;
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [tab, setTab] = useState<(typeof tabs)[number]>("Account");
   const [fontSize, setFontSize] = useState<"Small" | "Medium" | "Large">("Medium");
   const [theme, setTheme] = useState<"Light" | "Sepia" | "Dark">("Sepia");
@@ -33,9 +35,19 @@ export default function ProfilePage() {
           <p className="text-ink-soft">{currentUser.email}</p>
           <p className="mt-1 text-xs text-ink-faint">Member since {currentUser.joined}</p>
         </div>
-        <button className="mt-2 rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-paper-soft sm:ml-auto sm:mt-0">
-          Edit Profile
-        </button>
+        <div className="mt-2 flex gap-2 sm:ml-auto sm:mt-0">
+          <button className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-paper-soft">
+            Edit Profile
+          </button>
+          <button
+            type="button"
+            onClick={() => router.replace("/login")}
+            className="inline-flex items-center gap-2 rounded-md border border-red-200 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
+          >
+            <LogOut size={16} aria-hidden="true" />
+            Log out
+          </button>
+        </div>
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
