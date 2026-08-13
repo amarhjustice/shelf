@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model authors {
+  author_id        BigInt             @id @default(autoincrement())
+  name             String             @db.VarChar(255)
+  bio              String?
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  resource_authors resource_authors[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model books {
+  resource_id     BigInt    @id
+  number_of_pages Int
+  isbn            String?   @db.VarChar(17)
+  featured_quote  String?
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @db.Timestamptz(6)
+  resources       resources @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model email_verification_tokens {
+  token_id   BigInt    @id @default(autoincrement())
+  user_id    BigInt
+  token_hash String
+  expires_at DateTime  @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  used_at    DateTime? @db.Timestamptz(6)
+  users      users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_email_verification_tokens_user_id")
+}
+
+model genres {
+  genre_id    BigInt      @id @default(autoincrement())
+  name        String      @unique @db.VarChar(100)
+  description String?
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime    @default(now()) @db.Timestamptz(6)
+  resources   resources[]
+}
+
+model languages {
+  language_id BigInt      @id @default(autoincrement())
+  name        String      @unique @db.VarChar(100)
+  code        String      @unique @db.VarChar(10)
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime    @default(now()) @db.Timestamptz(6)
+  resources   resources[]
+}
+
+model password_reset_tokens {
+  token_id   BigInt    @id @default(autoincrement())
+  user_id    BigInt
+  token_hash String
+  expires_at DateTime  @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  used_at    DateTime? @db.Timestamptz(6)
+  users      users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_password_reset_tokens_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model resource_authors {
+  resource_id BigInt
+  author_id   BigInt
+  role        String    @default("AUTHOR") @db.VarChar(30)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  authors     authors   @relation(fields: [author_id], references: [author_id], onDelete: Cascade, onUpdate: NoAction)
+  resources   resources @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([resource_id, author_id])
+  @@index([author_id], map: "idx_resource_authors_author_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model resource_files {
+  file_id           BigInt    @id @default(autoincrement())
+  resource_id       BigInt
+  storage_key       String    @unique(map: "resource_files_storage_key_unique")
+  original_filename String    @db.VarChar(255)
+  format            String    @db.VarChar(10)
+  file_size         BigInt?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @default(now()) @db.Timestamptz(6)
+  resources         resources @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([resource_id], map: "idx_resource_files_resource_id")
+}
+
+model resource_topics {
+  resource_id BigInt
+  topic_id    BigInt
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  resources   resources @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, onUpdate: NoAction)
+  topics      topics    @relation(fields: [topic_id], references: [topic_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([resource_id, topic_id])
+  @@index([topic_id], map: "idx_resource_topics_topic_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model resources {
+  resource_id      BigInt             @id @default(autoincrement())
+  title            String             @db.VarChar(255)
+  genre_id         BigInt
+  language_id      BigInt
+  synopsis         String?
+  license_type     String             @db.VarChar(100)
+  access_type      String             @default("FREE") @db.VarChar(20)
+  price            Decimal            @default(0.00) @db.Decimal(10, 2)
+  currency         String             @default("GHS") @db.VarChar(3)
+  cover_image_url  String?
+  cover_public_id  String?            @db.VarChar(255)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  books            books?
+  resource_authors resource_authors[]
+  resource_files   resource_files[]
+  resource_topics  resource_topics[]
+  genres           genres             @relation(fields: [genre_id], references: [genre_id], onDelete: NoAction, onUpdate: NoAction)
+  languages        languages          @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model topics {
+  topic_id        BigInt            @id @default(autoincrement())
+  name            String            @db.VarChar(150)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime          @default(now()) @db.Timestamptz(6)
+  resource_topics resource_topics[]
+}
+
+model user_sessions {
+  session_id BigInt    @id @default(autoincrement())
+  user_id    BigInt
+  token_hash String    @unique
+  expires_at DateTime  @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  revoked_at DateTime? @db.Timestamptz(6)
+  users      users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_user_sessions_user_id")
+}
+
+model users {
+  user_id                   BigInt                      @id @default(autoincrement())
+  full_name                 String                      @db.VarChar(150)
+  email                     String                      @unique @db.VarChar(255)
+  password_hash             String
+  email_verified            Boolean                     @default(false)
+  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  email_verification_tokens email_verification_tokens[]
+  password_reset_tokens     password_reset_tokens[]
+  user_sessions             user_sessions[]
+}
