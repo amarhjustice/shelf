@@ -1,5 +1,1 @@
-export type EmailJob = {
-  type: "verification";
-  to: string;
-  encryptedToken: string;
-};
+export type { EmailJob } from "../email/types";

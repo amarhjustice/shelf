@@ -45,13 +45,13 @@ export async function processEmailJob(job: EmailJob): Promise<void> {
   switch (job.type) {
     case "verification": {
       const token = decryptToken(job.encryptedToken);
-      const url = `${appUrl}/api/auth/verify-email?token=${token}`;
+      const url = `${appUrl}/api/auth/verify-email` +`?token=${encodeURIComponent(token)}`;
       await provider.send(buildVerificationEmail(job.to, url));
       return;
     }
     case "password_reset": {
       const token = decryptToken(job.encryptedToken);
-      const url = `${appUrl}/api/auth/reset-password?token=${token}`;
+      const url =`${appUrl}/api/auth/reset-password` +`?token=${encodeURIComponent(token)}`;
       await provider.send(buildPasswordResetEmail(job.to, url));
       return;
     }
