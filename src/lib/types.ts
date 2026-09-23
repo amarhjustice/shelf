@@ -25,7 +25,7 @@ export type Book = {
   readingTimeMinutes: number;
   pages: number;
   isPublicDomain: boolean;
-  rating: number;
+  rating?: number;
   quote?: string;
   palette: CoverPalette;
   chapters: Chapter[];

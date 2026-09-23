@@ -1,13 +1,139 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookMarked, Gauge, NotebookPen } from "lucide-react";
-import { categories, findByIds, popularBookIds, recentlyAddedIds } from "@/lib/mock-data";
+import { prisma } from "@/lib/prisma";
 import CategoryCard from "@/components/CategoryCard";
 import BookCard from "@/components/BookCard";
 
-export default function HomePage() {
-  const popular = findByIds(popularBookIds);
-  const recent = findByIds(recentlyAddedIds);
+export default async function HomePage() {
+  const bookCount = await prisma.resources.count();
+
+  const genres = await prisma.genres.findMany({
+    orderBy: {
+      name: "asc",
+    },
+    include: {
+      _count: {
+        select: {
+          resources: true,
+        },
+      },
+    },
+  });
+
+  const resources = await prisma.resources.findMany({
+    orderBy: {
+      created_at: "desc",
+    },
+    take: 10,
+    include: {
+      genres: true,
+      languages: true,
+      books: {
+        include: {
+          book_chapters: true,
+        },
+      },
+      resource_authors: {
+        include: {
+          authors: true,
+        },
+        orderBy: {
+          role: "asc",
+        },
+      },
+      resource_topics: {
+        include: {
+          topics: true,
+        },
+      },
+    },
+  });
+
+const categoryIcons: Record<string, string> = {
+  "Classic Literature": "book-open",
+  Fiction: "book-marked",
+  Poetry: "feather",
+  Philosophy: "brain",
+  History: "landmark",
+  "Children's Books": "smile",
+  Science: "flask-conical",
+  Education: "graduation-cap",
+};
+
+const categoryDescriptions: Record<string, string> = {
+  "Classic Literature": "Enduring works that shaped the canon",
+  Fiction: "Novels and short stories",
+  Poetry: "Verse across centuries and cultures",
+  Philosophy: "Ideas that ask the bigger questions",
+  History: "Accounts of how we got here",
+  "Children's Books": "Stories for younger readers",
+  Science: "Discovery, explained clearly",
+  Education: "Foundational texts and references",
+};
+
+const categories = genres.map((genre) => ({
+  id: genre.genre_id.toString(),
+  name: genre.name,
+  icon: categoryIcons[genre.name] ?? "book-open",
+  description:
+    categoryDescriptions[genre.name] ??
+    "Explore books and resources in this category.",
+  count: genre._count.resources,
+}));
+
+
+
+const books = resources.map((resource) => {
+  const primaryAuthor =
+    resource.resource_authors.find(
+      (resourceAuthor) => resourceAuthor.role === "AUTHOR"
+    )?.authors ?? resource.resource_authors[0]?.authors;
+
+  const palette =
+    resource.cover_palette &&
+    typeof resource.cover_palette === "object" &&
+    !Array.isArray(resource.cover_palette)
+      ? (resource.cover_palette as {
+          from: string;
+          to: string;
+          ink: string;
+        })
+      : {
+          from: "#20281c",
+          to: "#37452b",
+          ink: "#eef2e6",
+        };
+
+  return {
+    id: resource.resource_id.toString(),
+    slug: resource.slug,
+    title: resource.title,
+    author: primaryAuthor?.name ?? "Unknown author",
+    authorBio: primaryAuthor?.bio ?? undefined,
+    description: resource.synopsis ?? "",
+    category: resource.genres.name,
+    topics: resource.resource_topics.map(
+      (resourceTopic) => resourceTopic.topics.name
+    ),
+    publicationYear: resource.publication_year ?? 0,
+    language: resource.languages.name,
+    readingTimeMinutes: resource.reading_time_minutes ?? 0,
+    pages: resource.books?.number_of_pages ?? 0,
+    isPublicDomain: resource.license_type === "PUBLIC_DOMAIN",
+    palette,
+    quote: resource.books?.featured_quote ?? undefined,
+    chapters:
+      resource.books?.book_chapters.map((chapter) => ({
+        id: chapter.chapter_id.toString(),
+        title: chapter.title,
+        page: chapter.page ?? 0,
+      })) ?? [],
+  };
+});
+
+const popular = books;
+const recent = books;
 
   return (
     <div>

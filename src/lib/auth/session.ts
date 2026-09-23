@@ -47,7 +47,16 @@ export async function getSession(token: string) {
       token_hash: tokenHash,
     },
     include: {
-      users: true,
+      users: {
+        select: {
+          user_id: true,
+          full_name: true,
+          email: true,
+          email_verified: true,
+          created_at: true,
+          updated_at: true,
+        },
+      },
     },
   });
 

@@ -9,7 +9,7 @@ datasource db {
 
 model authors {
   author_id        BigInt             @id @default(autoincrement())
-  name             String             @db.VarChar(255)
+  name             String             @unique @db.VarChar(255)
   bio              String?
   created_at       DateTime           @default(now()) @db.Timestamptz(6)
   updated_at       DateTime           @default(now()) @db.Timestamptz(6)
@@ -18,13 +18,31 @@ model authors {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model books {
-  resource_id     BigInt    @id
+  resource_id     BigInt   @id
   number_of_pages Int
-  isbn            String?   @db.VarChar(17)
+  isbn            String?  @db.VarChar(17)
   featured_quote  String?
-  created_at      DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime  @default(now()) @db.Timestamptz(6)
-  resources       resources @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, onUpdate: NoAction)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  resources     resources       @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, onUpdate: NoAction)
+  book_chapters book_chapters[]
+}
+
+model book_chapters {
+  chapter_id     BigInt   @id @default(autoincrement())
+  resource_id    BigInt
+  chapter_number Int
+  title          String   @db.VarChar(255)
+  page           Int?
+  content        String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now())
+
+  books books @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([resource_id, chapter_number])
+  @@index([resource_id])
 }
 
 model email_verification_tokens {
@@ -110,31 +128,35 @@ model resource_topics {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model resources {
-  resource_id      BigInt             @id @default(autoincrement())
-  title            String             @db.VarChar(255)
-  genre_id         BigInt
-  language_id      BigInt
-  synopsis         String?
-  license_type     String             @db.VarChar(100)
-  access_type      String             @default("FREE") @db.VarChar(20)
-  price            Decimal            @default(0.00) @db.Decimal(10, 2)
-  currency         String             @default("GHS") @db.VarChar(3)
-  cover_image_url  String?
-  cover_public_id  String?            @db.VarChar(255)
-  created_at       DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
-  books            books?
-  resource_authors resource_authors[]
-  resource_files   resource_files[]
-  resource_topics  resource_topics[]
-  genres           genres             @relation(fields: [genre_id], references: [genre_id], onDelete: NoAction, onUpdate: NoAction)
-  languages        languages          @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
+  resource_id          BigInt             @id @default(autoincrement())
+  slug                 String             @unique @db.VarChar(255)
+  title                String             @db.VarChar(255)
+  genre_id             BigInt
+  language_id          BigInt
+  synopsis             String?
+  publication_year     Int?
+  reading_time_minutes Int?
+  license_type         String             @db.VarChar(100)
+  access_type          String             @default("FREE") @db.VarChar(20)
+  price                Decimal            @default(0.00) @db.Decimal(10, 2)
+  currency             String             @default("GHS") @db.VarChar(3)
+  cover_image_url      String?
+  cover_public_id      String?            @db.VarChar(255)
+  cover_palette        Json?
+  created_at           DateTime           @default(now())
+  updated_at           DateTime           @default(now())
+  books                books?
+  resource_authors     resource_authors[]
+  resource_files       resource_files[]
+  resource_topics      resource_topics[]
+  genres               genres             @relation(fields: [genre_id], references: [genre_id], onDelete: NoAction, onUpdate: NoAction)
+  languages            languages          @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model topics {
   topic_id        BigInt            @id @default(autoincrement())
-  name            String            @db.VarChar(150)
+  name            String            @unique @db.VarChar(150)
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   updated_at      DateTime          @default(now()) @db.Timestamptz(6)
   resource_topics resource_topics[]
